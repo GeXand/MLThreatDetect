@@ -1,14 +1,14 @@
-package com.example.mlthreatdetect.ui.notifications;
+package com.example.mlthreatdetect.ui.information;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class NotificationsViewModel extends ViewModel {
+public class InformationViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public NotificationsViewModel() {
+    public InformationViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is notifications fragment");
     }

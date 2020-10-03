@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.mlthreatdetect.MainActivity;
 import com.example.mlthreatdetect.R;
 
 public class DashboardFragment extends Fragment {
