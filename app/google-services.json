@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "197067798070",
+    "firebase_url": "https://automated-threat-recognition.firebaseio.com",
+    "project_id": "automated-threat-recognition",
+    "storage_bucket": "automated-threat-recognition.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197067798070:android:9fdf1d0df6aa8d58df8a97",
+        "android_client_info": {
+          "package_name": "com.example.mlthreatdetect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "197067798070-p1bvdjimau5qhjspj7iksma4l6h2m3lc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbxYfO1sLGAjEF1EqzWwkYEZHBKW8GKM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "197067798070-p1bvdjimau5qhjspj7iksma4l6h2m3lc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
