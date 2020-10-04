@@ -26,12 +26,15 @@ def detect_labels(path, disp):
     labels = response.label_annotations
     print('Labels:')
 
+    violent_labels = []
+
     for label in labels:
         description = label.description.lower()
         print(description)
         
         if ("gun" in description) or ("knife" in description) or ("firearm" in description):
             disp = True
+            violent_labels.append((description, label.score))
 
     if response.error.message:
         print("Error: Failed to successfully analyze image.")
@@ -39,7 +42,7 @@ def detect_labels(path, disp):
         #     '{}\nFor more info on error messages, check: '
         #     'https://cloud.google.com/apis/design/errors'.format(
         #         response.error.message))
-    return disp
+    return disp, violent_labels
 
 def detect_safe_search(path, disp):
     """Detects unsafe features in the file."""
@@ -75,7 +78,7 @@ def detect_safe_search(path, disp):
         #         response.error.message))
     return disp
 
-def localize_objects(path, disp):
+def localize_objects(path, disp, violent_labels):
     """Localize objects in the local image.
 
     Args:
@@ -112,9 +115,26 @@ def localize_objects(path, disp):
             # x.append(os.path.basename(path))
         # drawVertices(path, object_.bounding_poly.normalized_vertices)
 
-    if disp2:
+    # Includes labels even if no localization
+    if len(violent_labels) != 0:
+        name = violent_labels[0][0]
+        score = violent_labels[0][1]
+        if "airsoft" in name:
+            name = "firearm"
+        display_text = '{} (confidence: {:.2f})'.format(name, score)
+
+        draw = ImageDraw.Draw(im)
+        width, height = im.size
+        font = ImageFont.truetype('arial.ttf', 16)
+        draw.text((10, 0.9*height-20),
+                  font=font, text=display_text, 
+                  fill=(255, 0, 0))
+        disp = True
+
+    # if disp2:
+    if disp:
         # im.show()
-        im.save(os.path.join("/Users/Rish209/Programming/hackathons/automated-threat-recognition/labeled_images", os.path.basename(path)))
+        im.save(os.path.join(os.path.join(os.getcwd(), "labeled_images"), os.path.basename(path)))
 
     return disp
 
@@ -129,7 +149,7 @@ def drawVertices(im, vertices, display_text=''):
     font = ImageFont.truetype('arial.ttf', 16)
     draw.text((points[0][0] + 10, points[0][1]),
               font=font, text=display_text, 
-              fill=(255, 255, 255))
+              fill=(255, 0, 0))
     # draw.line((vertices[0].x, vertices[0].y, vertices[0].x+10, vertices[0].y), fill=(0, 0, 0, 255), width = 10)
     # im.show()
 
@@ -139,10 +159,13 @@ def main():
 
     try:
         image_directory = os.getcwd()
+        exclude = ["labeled_images", "labeled_images_localization"]
         # image_directory = sys.argv[1]
         # extension = "." + sys.argv[2]
 
-        for root, dirs, files in os.walk(image_directory):
+        for root, dirs, files in os.walk(image_directory, topdown=True):
+            dirs[:] = [d for d in dirs if d not in exclude]
+
             for filename in files:
                 if filename.endswith(".jpg") or filename.endswith(".png"):
                 # if filename.endswith(extension):
@@ -151,13 +174,13 @@ def main():
                     path = os.path.join(root, filename)
                     print("File: " + filename)
 
-                    disp = detect_labels(path, disp)
+                    disp, violent_labels = detect_labels(path, disp)
                     print()
 
-                    disp = detect_safe_search(path, disp)
-                    print()
+                    # disp = detect_safe_search(path, disp)
+                    # print()
 
-                    disp = localize_objects(path, disp)
+                    disp = localize_objects(path, disp, violent_labels)
                     print()
                     # break
     # except:
