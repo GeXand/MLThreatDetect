@@ -2,8 +2,19 @@ import io, sys, os
 from google.cloud import vision
 from PIL import Image, ImageDraw, ImageFont
 
+x = []
+
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
+
+
 """Detects labels in the file."""
-def detect_labels(path):
+def detect_labels(path, disp):
     client = vision.ImageAnnotatorClient()
 
     with io.open(path, 'rb') as image_file:
@@ -16,7 +27,11 @@ def detect_labels(path):
     print('Labels:')
 
     for label in labels:
-        print(label.description)
+        description = label.description.lower()
+        print(description)
+        
+        if ("gun" in description) or ("knife" in description) or ("firearm" in description):
+            disp = True
 
     if response.error.message:
         print("Error: Failed to successfully analyze image.")
@@ -24,8 +39,9 @@ def detect_labels(path):
         #     '{}\nFor more info on error messages, check: '
         #     'https://cloud.google.com/apis/design/errors'.format(
         #         response.error.message))
+    return disp
 
-def detect_safe_search(path):
+def detect_safe_search(path, disp):
     """Detects unsafe features in the file."""
     client = vision.ImageAnnotatorClient()
 
@@ -48,14 +64,18 @@ def detect_safe_search(path):
     print('violence: {}'.format(likelihood_name[safe.violence]))
     # print('racy: {}'.format(likelihood_name[safe.racy]))
 
+    if safe.violence >= 3:
+        disp = True
+
     if response.error.message:
         print("Error: Failed to successfully analyze image.")
         # raise Exception(
         #     '{}\nFor more info on error messages, check: '
         #     'https://cloud.google.com/apis/design/errors'.format(
         #         response.error.message))
+    return disp
 
-def localize_objects(path):
+def localize_objects(path, disp):
     """Localize objects in the local image.
 
     Args:
@@ -72,17 +92,31 @@ def localize_objects(path):
 
     im = Image.open(io.BytesIO(content))
 
+    disp2 = False
+
     print('Number of objects found: {}'.format(len(objects)))
     for object_ in objects:
         print('{} (confidence: {})'.format(object_.name, object_.score))
+
         # print('Normalized bounding polygon vertices: ')
         # for vertex in object_.bounding_poly.normalized_vertices:
         #     print(' - ({}, {})'.format(vertex.x, vertex.y))
 
-        if ("gun" in object_.name or "knife" in object_.name):
+        name = object_.name.lower()
+
+        if ("gun" in name or "knife" in name or "firearm" in name):
             drawVertices(im, object_.bounding_poly.normalized_vertices, '{} (confidence: {:.2f})'.format(object_.name, object_.score))
+            disp = True
+            disp2 = True
+            x.append(path)
+            # x.append(os.path.basename(path))
         # drawVertices(path, object_.bounding_poly.normalized_vertices)
-    im.show()
+
+    if disp2:
+        # im.show()
+        im.save(os.path.join("/Users/Rish209/Programming/hackathons/automated-threat-recognition/labeled_images", os.path.basename(path)))
+
+    return disp
 
 def drawVertices(im, vertices, display_text=''):
     width, height = im.size
@@ -101,23 +135,36 @@ def drawVertices(im, vertices, display_text=''):
 
 
 def main():
-    image_directory = sys.argv[1]
-    extension = "." + sys.argv[2]
+    blockPrint() #Suppressing prints
 
-    for filename in os.listdir(image_directory):
-        if filename.endswith(extension):
-            path = os.path.join(image_directory, filename)
-            print("File: " + filename)
+    try:
+        image_directory = os.getcwd()
+        # image_directory = sys.argv[1]
+        # extension = "." + sys.argv[2]
 
-            detect_labels(path)
-            print()
+        for root, dirs, files in os.walk(image_directory):
+            for filename in files:
+                if filename.endswith(".jpg") or filename.endswith(".png"):
+                # if filename.endswith(extension):
+                    disp = False
 
-            detect_safe_search(path)
-            print()
+                    path = os.path.join(root, filename)
+                    print("File: " + filename)
 
-            localize_objects(path)
-            print()
-            # break
+                    disp = detect_labels(path, disp)
+                    print()
+
+                    disp = detect_safe_search(path, disp)
+                    print()
+
+                    disp = localize_objects(path, disp)
+                    print()
+                    # break
+    # except:
+    #     print("Error in ", path)
+    finally:
+        for path in x:
+            print(path)
 
 if __name__ == '__main__':
     main()
