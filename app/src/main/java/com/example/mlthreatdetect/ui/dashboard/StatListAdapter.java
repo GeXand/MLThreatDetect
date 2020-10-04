@@ -22,7 +22,7 @@ public class StatListAdapter extends ArrayAdapter<Stat> {
     private int mResource;
 
     public StatListAdapter(@NonNull Context context, int resource, ArrayList<Stat> stats) {
-        super(context, resource);
+        super(context, resource, stats);
         mContext = context;
         mResource = resource;
     }
@@ -42,7 +42,7 @@ public class StatListAdapter extends ArrayAdapter<Stat> {
         TextView sAmount = (TextView) convertView.findViewById(R.id.textView2);
 
         sName.setText(stat.getName());
-        sAmount.setText(stat.getAmount());
+        sAmount.setText(String.valueOf(stat.getAmount()));
 
         return convertView;
     }

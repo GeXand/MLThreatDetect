@@ -31,11 +31,14 @@ public class DashboardFragment extends Fragment {
 
         ListView statSummary = (ListView) root.findViewById(R.id.list);
 
+        // TODO: Store/get info from database
         ArrayList<Stat> stats = new ArrayList<Stat>();
         stats.add(new Stat("Foot Traffic", 1000));
-        stats.add(new Stat("Foot Traffic", 1000));
-        stats.add(new Stat("Foot Traffic", 1000));
+        stats.add(new Stat("Store Visitors", 90));
+        stats.add(new Stat("Purchases", 40));
+        stats.add(new Stat("Lost Items", 3));
         StatListAdapter adapter = new StatListAdapter(getActivity(), R.layout.adapter_view_layout, stats);
+
         statSummary.setAdapter(adapter);
 
         return root;
